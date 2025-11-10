@@ -87,7 +87,7 @@ with bz2.open(input_file_path, "rt") as f:
 
             id_title2parsed_obj[key] = parsed_obj
 
-        except Exception as e:
+        except Exception:
             line = line.strip().strip(",")
 
             if line == "[" or line == "]":
@@ -101,4 +101,3 @@ with bz2.open(input_file_path, "rt") as f:
 print("Processed: {:.2f}%".format(c * 100 / num_lines))
 print("Dumping", output_file_path)
 pickle.dump(id_title2parsed_obj, open(output_file_path, "wb"), protocol=4)
-

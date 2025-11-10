@@ -4,7 +4,6 @@
 # This source code is licensed under the license found in the
 # LICENSE file in the root directory of this source tree.
 #
-import sys
 import pickle
 import subprocess
 import blink.candidate_retrieval.dataset as D
@@ -305,4 +304,3 @@ def write_candidate_generation_results_to_file(
         write_candidate_generation_execution_time_to_file(
             results_dump_file_path, execution_time
         )
-

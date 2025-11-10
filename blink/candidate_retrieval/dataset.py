@@ -4,10 +4,11 @@
 # This source code is licensed under the license found in the
 # LICENSE file in the root directory of this source tree.
 #
-import re
-import pickle
 import os
+import pickle
+import re
 import time
+
 import numpy as np
 
 """
@@ -117,7 +118,6 @@ def read_conll_file(data, path):
         cur_conll_m_id = 0
         for m in content:
             mention = m["mention"]
-            gold = m["gold"]
 
             while True:
                 cur_conll_m = conll_doc["mentions"][cur_conll_m_id]

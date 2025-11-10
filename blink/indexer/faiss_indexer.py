@@ -5,13 +5,11 @@
 # LICENSE file in the root directory of this source tree.
 #
 """
-FAISS-based index components. Original from 
+FAISS-based index components. Original from
 https://github.com/facebookresearch/DPR/blob/master/dpr/indexer/faiss_indexers.py
 """
 
-import os
 import logging
-import pickle
 
 import faiss
 import numpy as np
@@ -70,7 +68,7 @@ class DenseFlatIndexer(DenseIndexer):
 # DenseHNSWFlatIndexer does approximate search
 class DenseHNSWFlatIndexer(DenseIndexer):
     """
-     Efficient index for retrieval. Note: default settings are for hugh accuracy but also high RAM usage
+    Efficient index for retrieval. Note: default settings are for hugh accuracy but also high RAM usage
     """
 
     def __init__(
@@ -103,7 +101,7 @@ class DenseHNSWFlatIndexer(DenseIndexer):
         phi = 0
         for i, item in enumerate(data):
             doc_vector = item
-            norms = (doc_vector ** 2).sum()
+            norms = (doc_vector**2).sum()
             phi = max(phi, norms)
         logger.info("HNSWF DotProduct -> L2 space phi={}".format(phi))
         self.phi = 0
@@ -114,7 +112,7 @@ class DenseHNSWFlatIndexer(DenseIndexer):
         for i in range(0, n, self.buffer_size):
             vectors = [np.reshape(t, (1, -1)) for t in data[i : i + self.buffer_size]]
 
-            norms = [(doc_vector ** 2).sum() for doc_vector in vectors]
+            norms = [(doc_vector**2).sum() for doc_vector in vectors]
             aux_dims = [np.sqrt(phi - norm) for norm in norms]
             hnsw_vectors = [
                 np.hstack((doc_vector, aux_dims[i].reshape(-1, 1)))

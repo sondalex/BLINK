@@ -100,8 +100,8 @@ class Evaluator:
                 if mention["gold_pos"] >= 0
             ]
         )
-        if ax == None:
-            fig = plt.figure(figsize=(7, 7))
+        if ax is None:
+            _ = plt.figure(figsize=(7, 7))
             ax = plt.subplot(111)
             ax.set_ylabel(str("Recall"))
             ax.set_xlabel(str("True entity rank"))
@@ -122,4 +122,3 @@ class Evaluator:
                     break
 
         ax.plot(rankings, recall)
-

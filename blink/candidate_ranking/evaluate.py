@@ -4,16 +4,13 @@
 # This source code is licensed under the license found in the
 # LICENSE file in the root directory of this source tree.
 #
-import time
-import utils
-import torch
-import utils
 import argparse
 import os
+import time
 
-from bert_reranking import BertReranker
-from torch.utils.data import DataLoader, RandomSampler, SequentialSampler, TensorDataset
-
+import torch
+import utils
+from torch.utils.data import DataLoader, SequentialSampler
 from tqdm import tqdm
 
 
@@ -178,7 +175,7 @@ def evaluate(parameters, logger=None):
         else:
             output_eval_file = parameters["output_eval_file"]
 
-        result = evaluate_model_on_dataset(
+        _ = evaluate_model_on_dataset(
             reranker.model,
             eval_dataloader,
             eval_dataset_name,
@@ -191,7 +188,7 @@ def evaluate(parameters, logger=None):
 
         execution_time = (time.time() - time_start) / 60
         total_time += execution_time
-        if logger != None:
+        if logger is not None:
             logger.info(
                 "The execution for dataset {} took {} minutes".format(
                     eval_dataset_name, execution_time
@@ -204,7 +201,7 @@ def evaluate(parameters, logger=None):
                 )
             )
 
-    if logger != None:
+    if logger is not None:
         logger.info(
             "The execution for dataset {} took {} minutes".format(
                 eval_dataset_name, execution_time
@@ -296,4 +293,3 @@ if __name__ == "__main__":
 
     parameters = args.__dict__
     evaluate(parameters, logger=utils.get_logger())
-

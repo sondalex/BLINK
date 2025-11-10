@@ -6,7 +6,6 @@
 #
 import xml.etree.ElementTree as ET
 import io
-import re
 import argparse
 import os
 import pickle

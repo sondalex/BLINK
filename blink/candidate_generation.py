@@ -5,7 +5,6 @@
 # LICENSE file in the root directory of this source tree.
 #
 import re
-import os
 import pysolr
 import sys
 
@@ -134,4 +133,3 @@ class BM45_Candidate_Generator(Candidate_Generator):
         string = re.sub(end, lambda x: x.group(0).lower(), string)
 
         return BM45_Candidate_Generator.ESCAPE_CHARS_RE.sub(r"\\\g<char>", string)
-

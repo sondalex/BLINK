@@ -5,45 +5,39 @@
 # LICENSE file in the root directory of this source tree.
 #
 import os
-import argparse
-import pickle
 import torch
-import json
-import sys
-import io
 import random
 import time
 import numpy as np
 
-from multiprocessing.pool import ThreadPool
 
 from tqdm import tqdm, trange
-from collections import OrderedDict
 
-from torch.utils.data import DataLoader, RandomSampler, SequentialSampler, TensorDataset
+from torch.utils.data import DataLoader, RandomSampler, SequentialSampler
 
-from pytorch_transformers.file_utils import PYTORCH_PRETRAINED_BERT_CACHE
 from pytorch_transformers.optimization import WarmupLinearSchedule
-from pytorch_transformers.tokenization_bert import BertTokenizer
 from pytorch_transformers.modeling_utils import WEIGHTS_NAME
 
 from blink.biencoder.biencoder import BiEncoderRanker, load_biencoder
-import logging
 
 import blink.candidate_ranking.utils as utils
 import blink.biencoder.data_process as data
-from blink.biencoder.zeshel_utils import DOC_PATH, WORLDS, world_to_id
 from blink.common.optimizer import get_bert_optimizer
 from blink.common.params import BlinkParser
 
 
 logger = None
 
+
 # The evaluate function during training uses in-batch negatives:
 # for a batch of size B, the labels from the batch are used as label candidates
 # B is controlled by the parameter eval_batch_size
 def evaluate(
-    reranker, eval_dataloader, params, device, logger,
+    reranker,
+    eval_dataloader,
+    params,
+    device,
+    logger,
 ):
     reranker.model.eval()
     if params["silent"]:
@@ -65,9 +59,7 @@ def evaluate(
 
         logits = logits.detach().cpu().numpy()
         # Using in-batch negatives, the label ids are diagonal
-        label_ids = torch.LongTensor(
-                torch.arange(params["eval_batch_size"])
-        ).numpy()
+        label_ids = torch.LongTensor(torch.arange(params["eval_batch_size"])).numpy()
         tmp_eval_accuracy, _ = utils.accuracy(logits, label_ids)
 
         eval_accuracy += tmp_eval_accuracy
@@ -99,7 +91,9 @@ def get_scheduler(params, optimizer, len_train_data, logger):
     num_warmup_steps = int(num_train_steps * params["warmup_proportion"])
 
     scheduler = WarmupLinearSchedule(
-        optimizer, warmup_steps=num_warmup_steps, t_total=num_train_steps,
+        optimizer,
+        warmup_steps=num_warmup_steps,
+        t_total=num_train_steps,
     )
     logger.info(" Num optimization steps = %d" % num_train_steps)
     logger.info(" Num warmup steps = %d", num_warmup_steps)
@@ -189,10 +183,12 @@ def main(params):
 
     # evaluate before training
     results = evaluate(
-        reranker, valid_dataloader, params, device=device, logger=logger,
+        reranker,
+        valid_dataloader,
+        params,
+        device=device,
+        logger=logger,
     )
-
-    number_of_samples_per_dataset = {}
 
     time_start = time.time()
 
@@ -259,7 +255,11 @@ def main(params):
             if (step + 1) % (params["eval_interval"] * grad_acc_steps) == 0:
                 logger.info("Evaluation on the development dataset")
                 evaluate(
-                    reranker, valid_dataloader, params, device=device, logger=logger,
+                    reranker,
+                    valid_dataloader,
+                    params,
+                    device=device,
+                    logger=logger,
                 )
                 model.train()
                 logger.info("\n")
@@ -270,9 +270,12 @@ def main(params):
         )
         utils.save_model(model, tokenizer, epoch_output_folder_path)
 
-        output_eval_file = os.path.join(epoch_output_folder_path, "eval_results.txt")
         results = evaluate(
-            reranker, valid_dataloader, params, device=device, logger=logger,
+            reranker,
+            valid_dataloader,
+            params,
+            device=device,
+            logger=logger,
         )
 
         ls = [best_score, results["normalized_accuracy"]]
@@ -292,7 +295,7 @@ def main(params):
     # save the best model in the parent_dir
     logger.info("Best performance in epoch: {}".format(best_epoch_idx))
     params["path_to_model"] = os.path.join(
-        model_output_path, 
+        model_output_path,
         "epoch_{}".format(best_epoch_idx),
         WEIGHTS_NAME,
     )

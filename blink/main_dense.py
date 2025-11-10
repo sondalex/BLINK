@@ -6,10 +6,8 @@
 #
 import argparse
 import json
-import sys
 
 from tqdm import tqdm
-import logging
 import torch
 import numpy as np
 from colorama import init
@@ -17,11 +15,10 @@ from termcolor import colored
 
 import blink.ner as NER
 from torch.utils.data import DataLoader, SequentialSampler, TensorDataset
-from blink.biencoder.biencoder import BiEncoderRanker, load_biencoder
-from blink.crossencoder.crossencoder import CrossEncoderRanker, load_crossencoder
+from blink.biencoder.biencoder import load_biencoder
+from blink.crossencoder.crossencoder import load_crossencoder
 from blink.biencoder.data_process import (
     process_mention_data,
-    get_candidate_representation,
 )
 import blink.candidate_ranking.utils as utils
 from blink.crossencoder.train_cross import modify, evaluate
@@ -193,7 +190,7 @@ def __load_test(test_filename, kb2id, wikipedia_id2local_id, logger):
                         record["label_id"] = wikipedia_id2local_id[key]
                     else:
                         continue
-                except:
+                except Exception:
                     continue
 
             # LOWERCASE EVERYTHING !
@@ -248,7 +245,9 @@ def _run_biencoder(biencoder, dataloader, candidate_encoding, top_k=100, indexer
                 scores, indicies = indexer.search_knn(context_encoding, top_k)
             else:
                 scores = biencoder.score_candidate(
-                    context_input, None, cand_encs=candidate_encoding  # .to(device)
+                    context_input,
+                    None,
+                    cand_encs=candidate_encoding,  # .to(device)
                 )
                 scores, indicies = scores.topk(top_k)
                 scores = scores.data.numpy()
@@ -274,7 +273,15 @@ def _run_crossencoder(crossencoder, dataloader, logger, context_len, device="cud
     accuracy = 0.0
     crossencoder.to(device)
 
-    res = evaluate(crossencoder, dataloader, device, logger, context_len, zeshel=False, silent=False)
+    res = evaluate(
+        crossencoder,
+        dataloader,
+        device,
+        logger,
+        context_len,
+        zeshel=False,
+        silent=False,
+    )
     accuracy = res["normalized_accuracy"]
     logits = res["logits"]
 
@@ -287,7 +294,6 @@ def _run_crossencoder(crossencoder, dataloader, logger, context_len, device="cud
 
 
 def load_models(args, logger=None):
-
     # load biencoder model
     if logger:
         logger.info("loading biencoder model")
@@ -318,10 +324,10 @@ def load_models(args, logger=None):
         wikipedia_id2local_id,
         faiss_indexer,
     ) = _load_candidates(
-        args.entity_catalogue, 
-        args.entity_encoding, 
-        faiss_index=getattr(args, 'faiss_index', None), 
-        index_path=getattr(args, 'index_path' , None),
+        args.entity_catalogue,
+        args.entity_encoding,
+        faiss_index=getattr(args, "faiss_index", None),
+        index_path=getattr(args, "index_path", None),
         logger=logger,
     )
 
@@ -354,7 +360,6 @@ def run(
     faiss_indexer=None,
     test_data=None,
 ):
-
     if not test_data and not args.test_mentions and not args.interactive:
         msg = (
             "ERROR: either you start BLINK with the "
@@ -370,7 +375,6 @@ def run(
 
     stopping_condition = False
     while not stopping_condition:
-
         samples = None
 
         if args.interactive:
@@ -430,7 +434,6 @@ def run(
         )
 
         if args.interactive:
-
             print("\nfast (biencoder) predictions:")
 
             _print_colorful_text(text, samples)
@@ -453,7 +456,6 @@ def run(
                 continue
 
         else:
-
             biencoder_accuracy = -1
             recall_at = -1
             if not keep_all:
@@ -477,7 +479,6 @@ def run(
                 print("biencoder recall@%d: %.4f" % (top_k, y[-1]))
 
             if args.fast:
-
                 predictions = []
                 for entity_list in nns:
                     sample_prediction = []
@@ -499,7 +500,13 @@ def run(
 
         # prepare crossencoder data
         context_input, candidate_input, label_input = prepare_crossencoder_data(
-            crossencoder.tokenizer, samples, labels, nns, id2title, id2text, keep_all,
+            crossencoder.tokenizer,
+            samples,
+            labels,
+            nns,
+            id2title,
+            id2text,
+            keep_all,
         )
 
         context_input = modify(
@@ -519,7 +526,6 @@ def run(
         )
 
         if args.interactive:
-
             print("\naccurate (crossencoder) predictions:")
 
             _print_colorful_text(text, samples)
@@ -537,13 +543,11 @@ def run(
                 idx += 1
             print()
         else:
-
             scores = []
             predictions = []
             for entity_list, index_list, scores_list in zip(
                 nns, index_array, unsorted_scores
             ):
-
                 index_list = index_list.tolist()
 
                 # descending order
@@ -570,7 +574,9 @@ def run(
 
                 if len(samples) > 0:
                     overall_unormalized_accuracy = (
-                        crossencoder_normalized_accuracy * len(label_input) / len(samples)
+                        crossencoder_normalized_accuracy
+                        * len(label_input)
+                        / len(samples)
                     )
                 print(
                     "overall unnormalized accuracy: %.4f" % overall_unormalized_accuracy
@@ -678,11 +684,17 @@ if __name__ == "__main__":
     )
 
     parser.add_argument(
-        "--faiss_index", type=str, default=None, help="whether to use faiss index",
+        "--faiss_index",
+        type=str,
+        default=None,
+        help="whether to use faiss index",
     )
 
     parser.add_argument(
-        "--index_path", type=str, default=None, help="path to load indexer",
+        "--index_path",
+        type=str,
+        default=None,
+        help="path to load indexer",
     )
 
     args = parser.parse_args()

@@ -6,7 +6,6 @@
 #
 import xml.etree.ElementTree as ET
 import io
-import re
 import argparse
 import os
 import pickle
@@ -68,7 +67,7 @@ with io.open(input_file_path, mode="rt", encoding="utf-8", errors="ignore") as f
             temp_obj["url"] = doc_attr["url"]
             temp_obj["lines"] = lines
 
-            text = " ".join([l for l in lines if l != ""])
+            text = " ".join([l for l in lines if l != ""])  # noqa: E741
             temp_obj["num_tokens"] = len(text.split(" "))
 
             id_, title = doc_attr["id"], doc_attr["title"]
@@ -92,4 +91,3 @@ with io.open(input_file_path, mode="rt", encoding="utf-8", errors="ignore") as f
 print("Processed: {:.2f}%".format(c * 100 / num_lines))
 print("Dumping", output_file_path)
 pickle.dump(id_title2parsed_obj, open(output_file_path, "wb"), protocol=4)
-

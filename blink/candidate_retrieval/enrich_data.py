@@ -4,10 +4,8 @@
 # This source code is licensed under the license found in the
 # LICENSE file in the root directory of this source tree.
 #
-import sqlite3
 import pickle
 import os
-import io
 import argparse
 import sys
 
@@ -79,7 +77,7 @@ not_found = {"xml": [], "regex": []}
 for key in links_data.keys():
     wikipedia_id, wikipedia_title = key
 
-    if links_data[key]["links_xml"] != None:
+    if links_data[key]["links_xml"] is not None:
         links = links_data[key]["links_xml"]
         total["xml"] = total["xml"] + len(links)
 
@@ -186,4 +184,3 @@ output_file_path = os.path.join(data_folder, output_file_name)
 
 print("Dumping", output_file_path)
 pickle.dump(title2parsed_obj, open(output_file_path, "wb"), protocol=4)
-

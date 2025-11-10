@@ -5,37 +5,20 @@
 # LICENSE file in the root directory of this source tree.
 #
 import os
-import argparse
-import pickle
-import torch
-import json
-import sys
-import io
 import random
 import time
+
 import numpy as np
-
-from multiprocessing.pool import ThreadPool
-
-from tqdm import tqdm, trange
-from collections import OrderedDict
-
-from torch.utils.data import DataLoader, RandomSampler, SequentialSampler, TensorDataset
-
-from pytorch_transformers.file_utils import PYTORCH_PRETRAINED_BERT_CACHE
+import torch
 from pytorch_transformers.optimization import WarmupLinearSchedule
-from pytorch_transformers.tokenization_bert import BertTokenizer
-
-import blink.candidate_retrieval.utils
-from blink.crossencoder.crossencoder import CrossEncoderRanker, load_crossencoder
-import logging
+from torch.utils.data import DataLoader, RandomSampler, SequentialSampler, TensorDataset
+from tqdm import tqdm, trange
 
 import blink.candidate_ranking.utils as utils
-import blink.biencoder.data_process as data
-from blink.biencoder.zeshel_utils import DOC_PATH, WORLDS, world_to_id
+from blink.biencoder.zeshel_utils import WORLDS
 from blink.common.optimizer import get_bert_optimizer
 from blink.common.params import BlinkParser
-
+from blink.crossencoder.crossencoder import CrossEncoderRanker
 
 logger = None
 
@@ -60,7 +43,9 @@ def modify(context_input, candidate_input, max_seq_length):
     return torch.LongTensor(new_input)
 
 
-def evaluate(reranker, eval_dataloader, device, logger, context_length, zeshel=False, silent=True):
+def evaluate(
+    reranker, eval_dataloader, device, logger, context_length, zeshel=False, silent=True
+):
     reranker.model.eval()
     if silent:
         iter_ = eval_dataloader
@@ -113,7 +98,7 @@ def evaluate(reranker, eval_dataloader, device, logger, context_length, zeshel=F
         normalized_eval_accuracy = eval_accuracy / nb_eval_examples
     if zeshel:
         macro = 0.0
-        num = 0.0 
+        num = 0.0
         for i in range(len(WORLDS)):
             if acc[i] > 0:
                 acc[i] /= tot[i]
@@ -149,7 +134,9 @@ def get_scheduler(params, optimizer, len_train_data, logger):
     num_warmup_steps = int(num_train_steps * params["warmup_proportion"])
 
     scheduler = WarmupLinearSchedule(
-        optimizer, warmup_steps=num_warmup_steps, t_total=num_train_steps,
+        optimizer,
+        warmup_steps=num_warmup_steps,
+        t_total=num_train_steps,
     )
     logger.info(" Num optimization steps = %d" % num_train_steps)
     logger.info(" Num warmup steps = %d", num_warmup_steps)
@@ -184,8 +171,6 @@ def main(params):
     params["train_batch_size"] = (
         params["train_batch_size"] // params["gradient_accumulation_steps"]
     )
-    train_batch_size = params["train_batch_size"]
-    eval_batch_size = params["eval_batch_size"]
     grad_acc_steps = params["gradient_accumulation_steps"]
 
     # Fix the random seeds
@@ -198,7 +183,7 @@ def main(params):
 
     max_seq_length = params["max_seq_length"]
     context_length = params["max_context_length"]
-    
+
     fname = os.path.join(params["data_path"], "train.t7")
     train_data = torch.load(fname)
     context_input = train_data["context_vecs"]
@@ -212,16 +197,14 @@ def main(params):
 
     context_input = modify(context_input, candidate_input, max_seq_length)
     if params["zeshel"]:
-        src_input = train_data['worlds'][:len(context_input)]
+        src_input = train_data["worlds"][: len(context_input)]
         train_tensor_data = TensorDataset(context_input, label_input, src_input)
     else:
         train_tensor_data = TensorDataset(context_input, label_input)
     train_sampler = RandomSampler(train_tensor_data)
 
     train_dataloader = DataLoader(
-        train_tensor_data, 
-        sampler=train_sampler, 
-        batch_size=params["train_batch_size"]
+        train_tensor_data, sampler=train_sampler, batch_size=params["train_batch_size"]
     )
 
     fname = os.path.join(params["data_path"], "valid.t7")
@@ -237,16 +220,14 @@ def main(params):
 
     context_input = modify(context_input, candidate_input, max_seq_length)
     if params["zeshel"]:
-        src_input = valid_data["worlds"][:len(context_input)]
+        src_input = valid_data["worlds"][: len(context_input)]
         valid_tensor_data = TensorDataset(context_input, label_input, src_input)
     else:
         valid_tensor_data = TensorDataset(context_input, label_input)
     valid_sampler = SequentialSampler(valid_tensor_data)
 
     valid_dataloader = DataLoader(
-        valid_tensor_data, 
-        sampler=valid_sampler, 
-        batch_size=params["eval_batch_size"]
+        valid_tensor_data, sampler=valid_sampler, batch_size=params["eval_batch_size"]
     )
 
     # evaluate before training
@@ -259,8 +240,6 @@ def main(params):
         zeshel=params["zeshel"],
         silent=params["silent"],
     )
-
-    number_of_samples_per_dataset = {}
 
     time_start = time.time()
 
@@ -295,7 +274,7 @@ def main(params):
         part = 0
         for step, batch in enumerate(iter_):
             batch = tuple(t.to(device) for t in batch)
-            context_input = batch[0] 
+            context_input = batch[0]
             label_input = batch[1]
             loss, _ = reranker(context_input, label_input, context_length)
 
@@ -354,7 +333,6 @@ def main(params):
         utils.save_model(model, tokenizer, epoch_output_folder_path)
         # reranker.save(epoch_output_folder_path)
 
-        output_eval_file = os.path.join(epoch_output_folder_path, "eval_results.txt")
         results = evaluate(
             reranker,
             valid_dataloader,
