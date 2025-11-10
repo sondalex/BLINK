@@ -11,6 +11,7 @@ import pickle
 
 from segtok.segmenter import split_multi
 
+
 ##### Reading helpers #####
 def read_sentences_from_file(path_to_file, one_sentence_per_line=True):
     lines = []
@@ -40,11 +41,16 @@ def get_candidate_summary(candidate):
 
 
 def present_sentence_mentions(sentence, mentions, output_file):
-    if output_file != None:
+    if output_file is not None:
         f = io.open(output_file, mode="a", encoding="utf-8")
-        output = lambda s: f.write("{}\n".format(s))
+
+        def output(s):
+            return f.write("{}\n".format(s))
     else:
-        output = lambda s: print(s)
+
+        def output(s):
+            return print(s)
+
     output("Sentence: {}".format(sentence))
 
     mention_entity_pairs = []

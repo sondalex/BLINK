@@ -15,7 +15,6 @@ import numpy as np
 
 from collections import OrderedDict
 from pytorch_transformers.modeling_utils import CONFIG_NAME, WEIGHTS_NAME
-from tqdm import tqdm
 
 from blink.candidate_ranking.bert_reranking import BertReranker
 from blink.biencoder.biencoder import BiEncoderRanker
@@ -37,7 +36,7 @@ def read_dataset(dataset_name, preprocessed_json_data_parent_folder, debug=False
 
 
 def filter_samples(samples, top_k, gold_key="gold_pos"):
-    if top_k == None:
+    if top_k is None:
         return samples
 
     filtered_samples = [
@@ -110,7 +109,7 @@ def save_model(model, tokenizer, output_dir):
 
 
 def get_logger(output_dir=None):
-    if output_dir != None:
+    if output_dir is not None:
         os.makedirs(output_dir, exist_ok=True)
         logging.basicConfig(
             format="%(asctime)s - %(levelname)s - %(name)s -   %(message)s",
@@ -131,7 +130,7 @@ def get_logger(output_dir=None):
             handlers=[logging.StreamHandler(sys.stdout)],
         )
 
-    logger = logging.getLogger('Blink')
+    logger = logging.getLogger("Blink")
     logger.setLevel(10)
     return logger
 

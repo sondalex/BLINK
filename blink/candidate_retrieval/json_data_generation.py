@@ -7,12 +7,9 @@
 import argparse
 import pickle
 import json
-import emoji
-import sys
 import os
 import io
 
-import blink.candidate_retrieval.utils as utils
 
 from tqdm import tqdm
 
@@ -69,8 +66,12 @@ for m in tqdm(mentions):
     # mention_obj['query_context_sent_prev_curr_next'] = utils.get_sent_context(m, 'prev_next', solr_escaped=False)
 
     # mention_obj['tagged_context_50'] = (m['left_context_orig'], m['right_context_orig'])
-    prev_sent = m["sent_context_orig"][0] if m["sent_context_orig"][0] != None else ""
-    next_sent = m["sent_context_orig"][2] if m["sent_context_orig"][2] != None else ""
+    prev_sent = (
+        m["sent_context_orig"][0] if m["sent_context_orig"][0] is not None else ""
+    )
+    next_sent = (
+        m["sent_context_orig"][2] if m["sent_context_orig"][2] is not None else ""
+    )
     mention_obj["tagged_query_context_sent_prev_curr_next"] = (
         "{} {}".format(prev_sent, m["left_query_sent_context_orig"]).strip(),
         "{} {}".format(m["right_query_sent_context_orig"], next_sent).strip(),
@@ -108,4 +109,3 @@ for dataset_name in dataset2processed_mentions:
 
             if idx != (len(processed_mentions) - 1):
                 file.write("\n")
-

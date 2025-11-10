@@ -12,7 +12,6 @@ import os
 import pickle
 import sys
 import urllib.parse
-import regex
 
 parser = argparse.ArgumentParser()
 
@@ -73,7 +72,7 @@ with io.open(input_file_path, mode="rt", encoding="utf-8", errors="ignore") as f
             temp_obj["url"] = doc_attr["url"]
             temp_obj["lines"] = lines
 
-            text = " ".join([l for l in lines if l != ""])
+            text = " ".join([l for l in lines if l != ""])  # noqa: E741
             try:
                 doc_xml = ET.fromstring(text)
                 links_xml = doc_xml.getchildren()
@@ -94,11 +93,11 @@ with io.open(input_file_path, mode="rt", encoding="utf-8", errors="ignore") as f
                     links.append(link)
 
                 temp_obj["links_xml"] = links
-            except Exception as e:
+            except Exception:
                 temp_obj["links_xml"] = None
                 docs_failed_xml += 1
 
-            text = " ".join([l for l in lines[1:-1] if l != ""])
+            text = " ".join([l for l in lines[1:-1] if l != ""])  # noqa: E741
             links = []
 
             for match in pattern.findall(text):

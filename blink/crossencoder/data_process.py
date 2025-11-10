@@ -4,14 +4,14 @@
 # This source code is licensed under the license found in the
 # LICENSE file in the root directory of this source tree.
 #
-import torch
 import sys
 
 import numpy as np
+import torch
 from tqdm import tqdm
-import blink.biencoder.data_process as data
-from blink.common.params import ENT_START_TAG, ENT_END_TAG
 
+import blink.biencoder.data_process as data
+from blink.common.params import ENT_END_TAG, ENT_START_TAG
 
 
 def prepare_crossencoder_mentions(
@@ -23,7 +23,6 @@ def prepare_crossencoder_mentions(
     ent_start_token=ENT_START_TAG,
     ent_end_token=ENT_END_TAG,
 ):
-
     context_input_list = []  # samples X 128
 
     for sample in tqdm(samples):
@@ -46,10 +45,6 @@ def prepare_crossencoder_mentions(
 def prepare_crossencoder_candidates(
     tokenizer, labels, nns, id2title, id2text, max_cand_length=128, topk=100
 ):
-
-    START_TOKEN = tokenizer.cls_token
-    END_TOKEN = tokenizer.sep_token
-
     candidate_input_list = []  # samples X topk=10 X 128
     label_input_list = []  # samples
     idx = 0
@@ -58,7 +53,6 @@ def prepare_crossencoder_candidates(
 
         label_id = -1
         for jdx, candidate_id in enumerate(nn[:topk]):
-
             if label == candidate_id:
                 label_id = jdx
 
@@ -115,7 +109,6 @@ def filter_crossencoder_tensor_input(
 def prepare_crossencoder_data(
     tokenizer, samples, labels, nns, id2title, id2text, keep_all=False
 ):
-
     # encode mentions
     context_input_list = prepare_crossencoder_mentions(tokenizer, samples)
 

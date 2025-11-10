@@ -10,13 +10,12 @@ import numpy as np
 
 from pytorch_transformers.modeling_bert import (
     BertPreTrainedModel,
-    BertConfig,
     BertModel,
 )
 from pytorch_transformers.tokenization_bert import BertTokenizer
 from torch.utils.data import DataLoader, SequentialSampler, TensorDataset
 from torch import nn
-from torch.nn import CrossEntropyLoss, MSELoss
+from torch.nn import CrossEntropyLoss
 from tqdm import tqdm
 
 from pytorch_transformers.optimization import AdamW, WarmupLinearSchedule
@@ -34,15 +33,15 @@ class BertForReranking(BertPreTrainedModel):
             (a) For sequence pairs:
 
                 ``tokens:         [CLS] is this jack ##son ##ville ? [SEP] no it is not . [SEP]``
-                
+
                 ``token_type_ids:   0   0  0    0    0     0       0   0   1  1  1  1   1   1``
 
             (b) For single sequences:
 
                 ``tokens:         [CLS] the dog is hairy . [SEP]``
-                
+
                 ``token_type_ids:   0   0   0   0  0     0   0``
-    
+
             Indices can be obtained using :class:`pytorch_transformers.BertTokenizer`.
             See :func:`pytorch_transformers.PreTrainedTokenizer.encode` and
             :func:`pytorch_transformers.PreTrainedTokenizer.convert_tokens_to_ids` for details.
@@ -177,7 +176,6 @@ class BertReranker:
         print("The reranking model is loaded")
 
     def rerank(self, mentions, sentences):
-        model = self.model
         tokenizer = self.tokenizer
         p = self.parameters
         device = self.device
@@ -534,7 +532,7 @@ class BertReranker:
                 all_entity_masks,
             )
 
-        if logger != None:
+        if logger is not None:
             logger.info("all_input_ids shape: {}".format(all_input_ids.shape))
             logger.info("all_input_mask shape: {}".format(all_input_mask.shape))
             logger.info("all_segment_ids shape: {}".format(all_segment_ids.shape))

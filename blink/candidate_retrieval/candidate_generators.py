@@ -135,7 +135,7 @@ class Pregenerated_Candidates_Data_Fetcher:
         for candidate in candidates_wikidata_ids:
             candidate_data = self.get_candidate_data_for_wikidata_id(candidate[0])
 
-            if candidate_data != None:
+            if candidate_data is not None:
                 candidate_data["p_e_m_score"] = candidate[2]
                 candidates_rich.append(candidate_data)
 

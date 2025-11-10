@@ -9,7 +9,6 @@ import pysolr
 import pickle
 import emoji
 import time
-import os
 
 parser = argparse.ArgumentParser()
 
@@ -159,7 +158,7 @@ ingestion_data = [get_data_for_key(title2data, key) for key in title2data]
 print("Starting ingestion")
 wall_start = time.time()
 
-l = 0
+l = 0  # noqa: E741
 r = step = 10000
 solr = pysolr.Solr(
     "http://localhost:8983/solr/{}".format(collection_name),
@@ -177,10 +176,9 @@ for r in range(r, len(ingestion_data), step):
 
     temp_data = ingestion_data[l:r]
     solr.add(temp_data, commit=True)
-    l = r
+    l = r  # noqa: E741
 
 solr.add(ingestion_data[l : len(ingestion_data)], commit=True)
 solr.commit()
 
 print("The processing took:", (time.time() - wall_start) / 60, " minutes")
-

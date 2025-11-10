@@ -10,16 +10,12 @@ from candidate_generators import (
     Pregenerated_Candidates_Data_Fetcher,
 )
 
-import multiprocessing
 import utils
 import time
 import argparse
 import pickle
 import os
 from evaluator import Evaluator
-from tqdm import tqdm
-
-import pysolr
 from tqdm import tqdm
 
 
@@ -115,8 +111,6 @@ def main(args):
     processed_mentions = []
     for _id, mentions in results:
         processed_mentions = processed_mentions + mentions
-
-    has_gold = 0
 
     pool.terminate()
     pool.join()
