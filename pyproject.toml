@@ -7,30 +7,38 @@ name = "BLINK"
 version = "0.1.0"
 description = "BLINK: Better entity LINKing"
 readme = "README.md"
-license = {text = "MIT"}
+license = { text = "MIT" }
 classifiers = [
-    "Intended Audience :: Science/Research",
-    "License :: OSI Approved :: MIT License",
-    "Programming Language :: Python :: 3.6",
-    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+  "Intended Audience :: Science/Research",
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: Python :: 3.6",
+  "Topic :: Scientific/Engineering :: Artificial Intelligence",
 ]
 requires-python = ">=3.6"
 dependencies = [
-    "torch>=1.2.0",
-    "pysolr>=3.8.1",
-    "emoji>=0.5.3",
-    "regex>=2019.8.19",
-    "matplotlib>=3.1.0",
-    "tqdm>=4.32.1",
-    "nltk>=3.4.4",
-    "numpy>=1.17.2",
-    "segtok>=1.5.7",
-    "flair>=0.4.3",
-    "pytorch-transformers>=1.2.0",
-    "colorama>=0.4.3",
-    "termcolor>=1.1.0",
-    "faiss-cpu>=1.6.1",
+  "torch>=1.2.0",
+  "pysolr>=3.8.1",
+  "emoji>=0.5.3",
+  "regex>=2019.8.19",
+  "matplotlib>=3.1.0",
+  "tqdm>=4.32.1",
+  "nltk>=3.4.4",
+  "numpy>=1.17.2",
+  "segtok>=1.5.7",
+  "flair>=0.4.3",
+  "pytorch-transformers>=1.2.0",
+  "colorama>=0.4.3",
+  "termcolor>=1.1.0",
+  "faiss-cpu>=1.6.1",
 ]
 
 [tool.setuptools.packages.find]
-include = ["blink"]
+include = [
+  "blink",
+  "blink.biencoder",
+  "blink.candidate_ranking",
+  "blink.candidate_retrieval",
+  "blink.common",
+  "blink.crossencoder",
+  "blink.indexer",
+]
